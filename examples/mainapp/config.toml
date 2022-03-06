@@ -23,4 +23,4 @@ details.duration_ms = "%{DURATION(MS)}"
 details.duration_s = "%{DURATION(S)}"
 
 [logging.plain]
-format = "%{UUID()} %{METHOD} %{URI} %{DURATION(MS)}"
+format = "ID: %{UUID()} Method: %{METHOD} URI: %{URI} Duration(ns): %{DURATION(NS)} Duration(ms): %{DURATION(MS)} Duration(s): %{DURATION(S)}"
