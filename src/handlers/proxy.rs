@@ -2,7 +2,10 @@ use actix_web::{error, Error, HttpRequest, HttpResponse, web};
 use awc::Client;
 use url::Url;
 
-pub async fn forward(
+/// Performs a reverse proxy request to the given URL.
+///
+/// The destination URL is configured at startup via the configuration file.
+pub async fn proxy(
     req: HttpRequest,
     payload: web::Payload,
     url: web::Data<Url>,
