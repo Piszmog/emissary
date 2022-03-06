@@ -16,9 +16,11 @@ mod utils;
 /// The main entry point of the application.
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
+    // get the configuration
     let args = Args::parse();
     let config_file = read_toml_file(args.config_file).unwrap();
 
+    // determine the logging mode
     match config_file.logging.mode {
         config::LoggingMode::Json => tracing_subscriber::fmt()
             .with_level(false)
@@ -36,7 +38,7 @@ async fn main() -> std::io::Result<()> {
         App::new()
             // data to share across requests/handlers
             .app_data(web::Data::new(Client::default()))
-            .app_data(web::Data::new(utils::to_url(config_file.proxy.address.clone(), config_file.proxy.port)))
+            .app_data(web::Data::new(utils::to_url(config_file.proxy.address.clone(), config_file.proxy.port).unwrap()))
             .app_data(web::Data::new(Info::new()))
             // middleware
             .wrap(logging::Logging { json: json.clone() })
