@@ -19,12 +19,16 @@ async fn main() -> std::io::Result<()> {
     let args = Args::parse();
     let config_file = read_toml_file(args.config_file).unwrap();
 
-    tracing_subscriber::fmt()
-        .with_level(false)
-        .with_file(false)
-        .without_time()
-        .with_target(false)
-        .init();
+    match config_file.logging.mode {
+        config::LoggingMode::Json => tracing_subscriber::fmt()
+            .with_level(false)
+            .without_time()
+            .with_target(false)
+            .init(),
+        config::LoggingMode::Plain => tracing_subscriber::fmt()
+            .with_target(false)
+            .init()
+    };
 
     let json = utils::convert(config_file.logging.json.format);
 

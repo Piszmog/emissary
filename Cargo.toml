@@ -14,7 +14,7 @@ url = "2.2"
 futures-util = { version = "0.3.7", default-features = false, features = ["std"] }
 toml = "0.5"
 tracing = "0.1"
-tracing-subscriber = "0.3"
+tracing-subscriber = {version= "0.3"}
 uuid = {version = "1.0.0-alpha.1", features = ["v4", "fast-rng", "macro-diagnostics"]}
 serde_json = "1.0"
 regex = "1.5"
