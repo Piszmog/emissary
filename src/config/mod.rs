@@ -28,7 +28,7 @@ pub struct Logging {
 }
 
 /// The logging mode.
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, Clone)]
 #[serde(rename_all = "lowercase")]
 pub enum LoggingMode {
     /// Log in the plain text format.
