@@ -5,6 +5,7 @@ use serde_json::Value as Json;
 use toml::Value as Toml;
 use url::Url;
 
+/// Converts the given string to a URL.
 pub fn to_url(addr: String, port: u16) -> Result<Url, UrlError> {
     (addr, port)
         .to_socket_addrs()
@@ -18,13 +19,14 @@ pub fn to_url(addr: String, port: u16) -> Result<Url, UrlError> {
         })
 }
 
-/// The error when loading the configuration.
+/// The error when building a URL.
 #[derive(Debug)]
 pub enum UrlError {
-    /// The file could not be read.
+    /// The url could not be read.
     Io(std::io::Error),
-    /// The file could not be parsed.
+    /// The url is invalid.
     InvalidUrl,
+    /// The url could not be parsed.
     Parse(url::ParseError),
 }
 
