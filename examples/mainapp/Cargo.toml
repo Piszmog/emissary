@@ -1,5 +1,5 @@
 [package]
-name = "emissary-examples"
+name = "emissary-examples-mainapp"
 version = "0.1.0"
 edition = "2021"
 publish = false
