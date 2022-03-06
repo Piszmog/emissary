@@ -1,4 +1,6 @@
-use actix_web::{get, post, App, HttpResponse, HttpServer, Responder};
+/// A simple Web application to test the reverse proxy functionality of emissary.
+
+use actix_web::{App, get, HttpResponse, HttpServer, post, Responder};
 
 #[get("/get")]
 async fn hello() -> impl Responder {
