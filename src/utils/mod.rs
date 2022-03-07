@@ -10,13 +10,13 @@ use url::Url;
 pub fn to_url(addr: String, port: u16) -> Result<Url, UrlError> {
     (addr, port)
         .to_socket_addrs()
-        .map_err(|e| UrlError::Io(e))?
+        .map_err(UrlError::Io)?
         .next()
         .ok_or(UrlError::InvalidUrl)
         .map(|a| format!("http://{}", a))
         .and_then(|s| {
             Url::parse(&s)
-                .map_err(|e| UrlError::Parse(e))
+                .map_err(UrlError::Parse)
         })
 }
 
@@ -71,20 +71,17 @@ pub struct Plain {
 impl From<Toml> for Plain {
     fn from(toml: Toml) -> Self {
         let mut data: BTreeMap<String, String> = BTreeMap::new();
-        match toml {
-            Toml::Table(table) => {
-                for (k, value) in table {
-                    match value {
-                        Toml::String(s) => data.insert(k, s),
-                        Toml::Integer(i) => data.insert(k, i.to_string()),
-                        Toml::Float(f) => data.insert(k, f.to_string()),
-                        Toml::Boolean(b) => data.insert(k, b.to_string()),
-                        Toml::Datetime(dt) => data.insert(k, dt.to_string()),
-                        _ => None,
-                    };
-                }
+        if let Toml::Table(table) = toml {
+            for (k, value) in table {
+                match value {
+                    Toml::String(s) => data.insert(k, s),
+                    Toml::Integer(i) => data.insert(k, i.to_string()),
+                    Toml::Float(f) => data.insert(k, f.to_string()),
+                    Toml::Boolean(b) => data.insert(k, b.to_string()),
+                    Toml::Datetime(dt) => data.insert(k, dt.to_string()),
+                    _ => None,
+                };
             }
-            _ => {}
         };
         Plain { data }
     }

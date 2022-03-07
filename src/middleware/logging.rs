@@ -132,12 +132,12 @@ fn populate_json(value: &mut Json, context: &Context) {
     match value {
         Json::Array(arr) => {
             for v in arr {
-                populate_json(v, &context);
+                populate_json(v, context);
             }
         }
         Json::Object(obj) => {
             for (_, v) in obj {
-                populate_json(v, &context);
+                populate_json(v, context);
             }
         }
         Json::String(s) => {
@@ -152,17 +152,11 @@ fn populate_json(value: &mut Json, context: &Context) {
                 _ => {
                     // To handle HTTP headers, we need to use the regexes. Since the key cannot be
                     // known ahead of time.
-                    match RE_REQ_HEADER.captures(s) {
-                        Some(cap) => {
-                            *s = header(context.req_head.headers(), &cap[1]);
-                        }
-                        None => {}
+                    if let Some(cap) = RE_REQ_HEADER.captures(s) {
+                        *s = header(context.req_head.headers(), &cap[1]);
                     };
-                    match RE_RES_HEADER.captures(s) {
-                        Some(cap) => {
-                            *s = header(context.res_head.headers(), &cap[1]);
-                        }
-                        None => {}
+                    if let Some(cap) = RE_RES_HEADER.captures(s) {
+                        *s = header(context.res_head.headers(), &cap[1]);
                     };
                 }
             }
@@ -190,17 +184,11 @@ fn populate_plain(value: &mut Plain, context: Context) {
             _ => {
                 // To handle HTTP headers, we need to use the regexes. Since the key cannot be
                 // known ahead of time.
-                match RE_REQ_HEADER.captures(s) {
-                    Some(cap) => {
-                        *s = header(context.req_head.headers(), &cap[1]);
-                    }
-                    None => {}
+                if let Some(cap) = RE_REQ_HEADER.captures(s) {
+                    *s = header(context.req_head.headers(), &cap[1]);
                 };
-                match RE_RES_HEADER.captures(s) {
-                    Some(cap) => {
-                        *s = header(context.res_head.headers(), &cap[1]);
-                    }
-                    None => {}
+                if let Some(cap) = RE_RES_HEADER.captures(s) {
+                    *s = header(context.res_head.headers(), &cap[1]);
                 };
             }
         }

@@ -2,7 +2,6 @@ use actix_web::{App, HttpServer, web};
 use awc::Client;
 use clap::Parser;
 use tracing::info;
-use tracing_subscriber;
 
 use config::read_toml_file;
 use handlers::{info, proxy};
