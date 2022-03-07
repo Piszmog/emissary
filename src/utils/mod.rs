@@ -1,3 +1,4 @@
+use std::collections::BTreeMap;
 use std::fmt::{Display, Formatter};
 use std::net::ToSocketAddrs;
 
@@ -43,7 +44,7 @@ impl Display for UrlError {
 impl std::error::Error for UrlError {}
 
 /// A helper function to parse the TOML into a JSON.
-pub fn convert(toml: Toml) -> Json {
+pub fn to_json(toml: Toml) -> Json {
     match toml {
         Toml::String(s) => Json::String(s),
         Toml::Integer(i) => Json::Number(i.into()),
@@ -52,10 +53,48 @@ pub fn convert(toml: Toml) -> Json {
             Json::Number(n)
         }
         Toml::Boolean(b) => Json::Bool(b),
-        Toml::Array(arr) => Json::Array(arr.into_iter().map(convert).collect()),
+        Toml::Array(arr) => Json::Array(arr.into_iter().map(to_json).collect()),
         Toml::Table(table) => {
-            Json::Object(table.into_iter().map(|(k, v)| (k, convert(v))).collect())
+            Json::Object(table.into_iter().map(|(k, v)| (k, to_json(v))).collect())
         }
         Toml::Datetime(dt) => Json::String(dt.to_string()),
+    }
+}
+
+/// The structure containing the plain logging configuration.
+#[derive(Debug, Clone)]
+pub struct Plain {
+    pub data: BTreeMap<String, String>,
+}
+
+// convert toml to Plain
+impl From<Toml> for Plain {
+    fn from(toml: Toml) -> Self {
+        let mut data: BTreeMap<String, String> = BTreeMap::new();
+        match toml {
+            Toml::Table(table) => {
+                for (k, value) in table {
+                    match value {
+                        Toml::String(s) => data.insert(k, s),
+                        Toml::Integer(i) => data.insert(k, i.to_string()),
+                        Toml::Float(f) => data.insert(k, f.to_string()),
+                        Toml::Boolean(b) => data.insert(k, b.to_string()),
+                        Toml::Datetime(dt) => data.insert(k, dt.to_string()),
+                        _ => None,
+                    };
+                }
+            }
+            _ => {}
+        };
+        Plain { data }
+    }
+}
+
+impl Display for Plain {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        self.data.iter().fold(Ok(()), |acc, (k, v)| {
+            write!(f, "{}=\"{}\" ", k, v)?;
+            acc
+        })
     }
 }

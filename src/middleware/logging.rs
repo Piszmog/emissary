@@ -15,9 +15,14 @@ use serde_json::{Number, Value as Json};
 use tracing::info;
 use uuid::Uuid;
 
+use crate::config;
+use crate::utils::Plain;
+
 /// The Logging middleware.
 pub struct Logging {
+    pub mode: config::LoggingMode,
     pub json: Json,
+    pub plain: Plain,
 }
 
 impl<S: 'static, B> Transform<S, ServiceRequest> for Logging
@@ -33,14 +38,21 @@ impl<S: 'static, B> Transform<S, ServiceRequest> for Logging
     type Future = Ready<Result<Self::Transform, Self::InitError>>;
 
     fn new_transform(&self, service: S) -> Self::Future {
-        ready(Ok(LoggingMiddleware { service: Rc::new(service), json: self.json.clone() }))
+        ready(Ok(LoggingMiddleware {
+            service: Rc::new(service),
+            mode: self.mode.clone(),
+            json: self.json.clone(),
+            plain: self.plain.clone(),
+        }))
     }
 }
 
 /// The actual logging middleware. Handles the request/response.
 pub struct LoggingMiddleware<S> {
     service: Rc<S>,
+    mode: config::LoggingMode,
     json: Json,
+    plain: Plain,
 }
 
 impl<S, B> Service<ServiceRequest> for LoggingMiddleware<S>
@@ -56,7 +68,9 @@ impl<S, B> Service<ServiceRequest> for LoggingMiddleware<S>
     forward_ready!(service);
 
     fn call(&self, req: ServiceRequest) -> Self::Future {
-        let mut json = self.json.clone();
+        let mode = self.mode.clone();
+        let json = self.json.clone();
+        let plain = self.plain.clone();
         let svc = self.service.clone();
 
         Box::pin(async move {
@@ -66,21 +80,35 @@ impl<S, B> Service<ServiceRequest> for LoggingMiddleware<S>
             let res = svc.call(req).await?;
             let end = Instant::now();
 
-            // we have everything we need to log, replace the JSON with the actual values
-            populate(&mut json, &Context {
+            let context = Context {
                 start,
                 end,
                 req_head: head,
                 res_head: res.response().head().clone(),
-            });
+            };
 
-            info!("{}", json);
+            log(mode, json, plain, context);
+
             Ok(res)
         })
     }
 }
 
+fn log(mode: config::LoggingMode, mut json: Json, mut plain: Plain, context: Context) {
+    match mode {
+        config::LoggingMode::Json => {
+            populate_json(&mut json, &context);
+            info!("{}", json);
+        }
+        config::LoggingMode::Plain => {
+            populate_plain(&mut plain, context);
+            info!("{}", plain);
+        }
+    }
+}
+
 /// The context of the request/response.
+#[derive(Debug)]
 struct Context {
     /// The start time of the request.
     start: Instant,
@@ -94,7 +122,7 @@ struct Context {
 
 /// Populate the JSON with the context information. Some of the fields may have values that need to
 /// be calculated at runtime.
-fn populate(value: &mut Json, context: &Context) {
+fn populate_json(value: &mut Json, context: &Context) {
     // create the regexes once
     lazy_static! {
         static ref RE_REQ_HEADER: Regex = Regex::new(r"%\{REQUEST_HEADER\((.*)\)}" ).unwrap();
@@ -104,12 +132,12 @@ fn populate(value: &mut Json, context: &Context) {
     match value {
         Json::Array(arr) => {
             for v in arr {
-                populate(v, &context);
+                populate_json(v, &context);
             }
         }
         Json::Object(obj) => {
             for (_, v) in obj {
-                populate(v, &context);
+                populate_json(v, &context);
             }
         }
         Json::String(s) => {
@@ -141,6 +169,42 @@ fn populate(value: &mut Json, context: &Context) {
         }
         _ => (),
     }
+}
+
+fn populate_plain(value: &mut Plain, context: Context) {
+    // create the regexes once
+    lazy_static! {
+        static ref RE_REQ_HEADER: Regex = Regex::new(r"%\{REQUEST_HEADER\((.*)\)}" ).unwrap();
+        static ref RE_RES_HEADER: Regex = Regex::new(r"%\{RESPONSE_HEADER\((.*)\)}" ).unwrap();
+    }
+
+    value.data.values_mut().for_each(|s| {
+        match s.as_str() {
+            "%{UUID()}" => *s = uuid(),
+            "%{DURATION(NS)}" => *s = duration(context.start, context.end, "ns").unwrap(),
+            "%{DURATION(MS)}" => *s = duration(context.start, context.end, "ms").unwrap(),
+            "%{DURATION(S)}" => *s = duration(context.start, context.end, "s").unwrap(),
+            "%{METHOD}" => *s = context.req_head.method.to_string(),
+            "%{URI}" => *s = context.req_head.uri.to_string(),
+            "%{STATUS_CODE}" => *s = context.res_head.status.as_u16().to_string(),
+            _ => {
+                // To handle HTTP headers, we need to use the regexes. Since the key cannot be
+                // known ahead of time.
+                match RE_REQ_HEADER.captures(s) {
+                    Some(cap) => {
+                        *s = header(context.req_head.headers(), &cap[1]);
+                    }
+                    None => {}
+                };
+                match RE_RES_HEADER.captures(s) {
+                    Some(cap) => {
+                        *s = header(context.res_head.headers(), &cap[1]);
+                    }
+                    None => {}
+                };
+            }
+        }
+    })
 }
 
 /// Generate a UUID.

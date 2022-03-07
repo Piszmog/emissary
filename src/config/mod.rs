@@ -46,7 +46,7 @@ pub struct JsonLogging {
 /// The plain logging configuration.
 #[derive(Debug, Deserialize)]
 pub struct PlainLogging {
-    pub format: String,
+    pub format: Value,
 }
 
 /// Load the configuration from the given path.

@@ -22,5 +22,15 @@ details.duration_ns = "%{DURATION(NS)}"
 details.duration_ms = "%{DURATION(MS)}"
 details.duration_s = "%{DURATION(S)}"
 
-[logging.plain]
-format = "ID: %{UUID()} Method: %{METHOD} URI: %{URI} Duration(ns): %{DURATION(NS)} Duration(ms): %{DURATION(MS)} Duration(s): %{DURATION(S)}"
+[logging.plain.format]
+# below structure generates,
+# <Timestamp> INFO ID=%{UUID()} Method=%{METHOD} Version=%{REQUEST_HEADER(VERSION)} URI=%{URI} Duration(ns)=%{DURATION(NS)} Duration(ms)=%{DURATION(MS)} Duration(s)=%{DURATION(S)} Status=%{STATUS_CODE} ContentType=%{RESPONSE_HEADER(CONTENT-TYPE)}
+ID = "%{UUID()}"
+Method = "%{METHOD}"
+Version = "%{REQUEST_HEADER(VERSION)}"
+URI = "%{URI}"
+"Duration(ns)" = "%{DURATION(NS)}"
+"Duration(ms)" = "%{DURATION(MS)}"
+"Duration(s)" = "%{DURATION(S)}"
+Status = "%{STATUS_CODE}"
+ContentType = "%{RESPONSE_HEADER(CONTENT-TYPE)}"
