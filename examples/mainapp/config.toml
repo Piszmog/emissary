@@ -1,0 +1,36 @@
+# See https://toml.io/en/v1.0.0 for more information on the TOML spec.
+
+[http]
+address = "127.0.0.1"
+port = 8080
+
+[proxy]
+address = "127.0.0.1"
+port = 8082
+
+[logging]
+mode = "json"
+
+[logging.json.format]
+request.id = "%{UUID()}"
+request.method = "%{METHOD}"
+request.version = "%{REQUEST_HEADER(VERSION)}"
+request.uri = "%{URI}"
+response.status_code = "%{STATUS_CODE}"
+response.content_type = "%{RESPONSE_HEADER(CONTENT-TYPE)}"
+details.duration_ns = "%{DURATION(NS)}"
+details.duration_ms = "%{DURATION(MS)}"
+details.duration_s = "%{DURATION(S)}"
+
+[logging.plain.format]
+# below structure generates,
+# <Timestamp> INFO ID=%{UUID()} Method=%{METHOD} Version=%{REQUEST_HEADER(VERSION)} URI=%{URI} Duration(ns)=%{DURATION(NS)} Duration(ms)=%{DURATION(MS)} Duration(s)=%{DURATION(S)} Status=%{STATUS_CODE} ContentType=%{RESPONSE_HEADER(CONTENT-TYPE)}
+ID = "%{UUID()}"
+Method = "%{METHOD}"
+Version = "%{REQUEST_HEADER(VERSION)}"
+URI = "%{URI}"
+"Duration(ns)" = "%{DURATION(NS)}"
+"Duration(ms)" = "%{DURATION(MS)}"
+"Duration(s)" = "%{DURATION(S)}"
+Status = "%{STATUS_CODE}"
+ContentType = "%{RESPONSE_HEADER(CONTENT-TYPE)}"
