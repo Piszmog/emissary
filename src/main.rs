@@ -12,10 +12,14 @@ mod handlers;
 mod middleware;
 mod config;
 mod utils;
+mod extension;
+
+include!(concat!(env!("OUT_DIR"), "/extension.rs"));
 
 /// The main entry point of the application.
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
+    let extensions = extensions();
     // get the configuration
     let args = Args::parse();
     let config_file = read_toml_file(args.config_file).unwrap();
