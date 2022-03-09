@@ -44,6 +44,7 @@ async fn main() -> std::io::Result<()> {
     info!("Starting emissary");
 
     HttpServer::new(move || {
+        // let exts = extensions();
         App::new()
             // HTTP client for the reverse proxy
             .app_data(web::Data::new(Client::default()))
@@ -57,7 +58,14 @@ async fn main() -> std::io::Result<()> {
                 json: json.clone(),
                 plain: plain.clone(),
             })
-            // all non-mapped routes go to the reverse proxy
+            // add any provided extensions
+            // .wrap(
+            //     Condition::new(
+            //         !exts.is_empty(),
+            //         middleware::extension::Extensions { extensions: Rc::new(exts) },
+            //     )
+            // )
+            // all non-mapped routes go to the proxy
             .default_service(web::to(proxy::proxy))
             // emissary services
             .service(
