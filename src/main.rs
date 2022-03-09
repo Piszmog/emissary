@@ -1,4 +1,5 @@
 use actix_web::{App, HttpServer, web};
+use actix_web::middleware::Condition;
 use awc::Client;
 use clap::Parser;
 use tracing::info;
@@ -52,11 +53,11 @@ async fn main() -> std::io::Result<()> {
             // information about the app
             .app_data(web::Data::new(Info::new()))
             // logging middleware
-            .wrap(logging::Logging {
+            .wrap(Condition::new(config_file.logging.enabled, logging::Logging {
                 mode: config_file.logging.mode.clone(),
                 json: json.clone(),
                 plain: plain.clone(),
-            })
+            }))
             // all non-mapped routes go to the reverse proxy
             .default_service(web::to(proxy::proxy))
             // emissary services
