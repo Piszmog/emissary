@@ -22,9 +22,15 @@ pub struct Http {
 /// The logging configuration.
 #[derive(Debug, Deserialize)]
 pub struct Logging {
+    #[serde(default = "default_logging_enabled")]
+    pub enabled: bool,
     pub mode: LoggingMode,
     pub json: JsonLogging,
     pub plain: PlainLogging,
+}
+
+fn default_logging_enabled() -> bool {
+    true
 }
 
 /// The logging mode.
