@@ -2,7 +2,6 @@ use actix_web::{App, HttpServer, web};
 use awc::Client;
 use clap::Parser;
 use tracing::info;
-use tracing_subscriber;
 
 use config::read_toml_file;
 use handlers::{info, proxy};
@@ -76,6 +75,6 @@ async fn main() -> std::io::Result<()> {
 #[clap(author, version, about, long_about = None)]
 struct Args {
     /// The path to the configuration file.
-    #[clap(short, long, default_value_t = String::from("./config.toml"))]
+    #[clap(short, long, default_value_t = String::from("./emissary.toml"))]
     config_file: String,
 }
