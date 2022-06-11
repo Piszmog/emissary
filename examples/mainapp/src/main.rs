@@ -6,7 +6,7 @@ use actix_web::{App, get, HttpResponse, HttpServer, post, Responder, http::heade
 async fn hello() -> impl Responder {
     HttpResponse::Ok()
         .content_type(ContentType::plaintext())
-        .body("Hello world!o")
+        .body("Hello world!")
 }
 
 #[post("/post")]
