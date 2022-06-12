@@ -12,6 +12,12 @@ jobs:
   build-linux-x86_64:
     name: Build Linux 64-bit
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        target:
+          - x86_64-unknown-linux-gnu
+          - x86_64-apple-darwin
+          - aarch64-apple-darwin
     steps:
       - uses: actions/checkout@v3
       - uses: actions/cache@v3
@@ -26,70 +32,21 @@ jobs:
       - uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
-          target: x86_64-unknown-linux-gnu
+          target: ${{ matrix.target }}
           override: true
-      - uses: actions-rs/cargo@v1
+      - name: Install x86_64 Build Dependencies
+        run: sudo apt-get update && sudo apt-get install pkg-config libssl-dev clang
+      - name: Build x86_64
+        uses: actions-rs/cargo@v1
+        env:
+          TARGET_CC: clang
         with:
           command: build
-          args: --release --target x86_64-unknown-linux-gnu
-      - uses: actions/upload-artifact@v3
-        with:
-          name: linux-x86_64
-          path: target/x86_64-unknown-linux-gnu/release/emissary
-  build-apple-x86_64:
-    name: Build Apple 64-bit
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/cache@v3
-        with:
-          path: |
-            ~/.cargo/bin/
-            ~/.cargo/registry/index/
-            ~/.cargo/registry/cache/
-            ~/.cargo/git/db/
-            target/
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-      - uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          target: x86_64-apple-darwin
-          override: true
-      - uses: actions-rs/cargo@v1
-        with:
-          command: build
-          args: --release --target x86_64-apple-darwin
-      - uses: actions/upload-artifact@v3
-        with:
-          name: apple-x86_64
-          path: target/x86_64-apple-darwin/release/emissary
-  build-apple-arm64:
-    name: Build Apple Silicon
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: actions/cache@v3
-        with:
-          path: |
-            ~/.cargo/bin/
-            ~/.cargo/registry/index/
-            ~/.cargo/registry/cache/
-            ~/.cargo/git/db/
-            target/
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-      - uses: actions-rs/toolchain@v1
-        with:
-          toolchain: stable
-          target: aarch64-apple-darwin
-          override: true
-      - uses: actions-rs/cargo@v1
-        with:
-          command: build
-          args: --release --target aarch64-apple-darwin
-      - uses: actions/upload-artifact@v3
-        with:
-          name: apple-x86_64
-          path: target/aarch64-apple-darwin/release/emissary
+          args: --release --target=${{ matrix.target }}
+#      - uses: actions/upload-artifact@v3
+#        with:
+#          name: linux-x86_64
+#          path: target/x86_64-unknown-linux-gnu/release/emissary
 #  tag:
 #    name: Tag
 #    runs-on: ubuntu-latest
