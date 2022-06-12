@@ -10,7 +10,7 @@ permissions:
   contents: write
 jobs:
   build-linux-x86_64:
-    name: Build
+    name: Build Linux 64-bit
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -37,7 +37,7 @@ jobs:
           name: linux-x86_64
           path: target/x86_64-unknown-linux-gnu/release/emissary
   build-apple-x86_64:
-    name: Build
+    name: Build Apple 64-bit
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -64,7 +64,7 @@ jobs:
           name: apple-x86_64
           path: target/x86_64-apple-darwin/release/emissary
   build-apple-arm64:
-    name: Build
+    name: Build Apple Silicon
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
