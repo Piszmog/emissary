@@ -8,7 +8,7 @@ use actix_web::{
 };
 use actix_web::dev::{RequestHead, ResponseHead};
 use actix_web::http::header::HeaderMap;
-use clap::lazy_static::lazy_static;
+use clap::__macro_refs::once_cell;
 use futures_util::future::LocalBoxFuture;
 use regex::Regex;
 use serde_json::{Number, Value as Json};
@@ -124,10 +124,12 @@ struct Context {
 /// be calculated at runtime.
 fn populate_json(value: &mut Json, context: &Context) {
     // create the regexes once
-    lazy_static! {
-        static ref RE_REQ_HEADER: Regex = Regex::new(r"%\{REQUEST_HEADER\((.*)\)}" ).unwrap();
-        static ref RE_RES_HEADER: Regex = Regex::new(r"%\{RESPONSE_HEADER\((.*)\)}" ).unwrap();
-    }
+    static RE_REQ_HEADER: once_cell::sync::Lazy<Regex> = once_cell::sync::Lazy::new(|| {
+        Regex::new(r"%\{REQUEST_HEADER\((.*)\)}").unwrap()
+    });
+    static RE_RES_HEADER: once_cell::sync::Lazy<Regex> = once_cell::sync::Lazy::new(|| {
+        Regex::new(r"%\{RESPONSE_HEADER\((.*)\)}").unwrap()
+    });
 
     match value {
         Json::Array(arr) => {
@@ -173,10 +175,12 @@ fn populate_json(value: &mut Json, context: &Context) {
 
 fn populate_plain(value: &mut Plain, context: Context) {
     // create the regexes once
-    lazy_static! {
-        static ref RE_REQ_HEADER: Regex = Regex::new(r"%\{REQUEST_HEADER\((.*)\)}" ).unwrap();
-        static ref RE_RES_HEADER: Regex = Regex::new(r"%\{RESPONSE_HEADER\((.*)\)}" ).unwrap();
-    }
+    static RE_REQ_HEADER: once_cell::sync::Lazy<Regex> = once_cell::sync::Lazy::new(|| {
+        Regex::new(r"%\{REQUEST_HEADER\((.*)\)}").unwrap()
+    });
+    static RE_RES_HEADER: once_cell::sync::Lazy<Regex> = once_cell::sync::Lazy::new(|| {
+        Regex::new(r"%\{RESPONSE_HEADER\((.*)\)}").unwrap()
+    });
 
     value.data.values_mut().for_each(|s| {
         match s.as_str() {

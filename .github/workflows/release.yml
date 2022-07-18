@@ -9,8 +9,8 @@ on:
 permissions:
   contents: write
 jobs:
-  build-linux-x86_64:
-    name: Build Linux 64-bit
+  build:
+    name: Build
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -34,12 +34,8 @@ jobs:
           toolchain: stable
           target: ${{ matrix.target }}
           override: true
-      - name: Install x86_64 Build Dependencies
-        run: sudo apt-get update && sudo apt-get install pkg-config libssl-dev clang
-      - name: Build x86_64
+      - name: Build
         uses: actions-rs/cargo@v1
-        env:
-          TARGET_CC: clang
         with:
           command: build
           args: --release --target=${{ matrix.target }}
