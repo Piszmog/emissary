@@ -13,7 +13,7 @@ codegen-units = 1
 
 [dependencies]
 actix-web = { version = "4", features = ["openssl"] }
-awc = "3.0.0"
+awc = "3.0.1"
 clap = { version = "3", features = ["derive"] }
 futures-util = { version = "0.3.23", default-features = false, features = ["std"] }
 regex = "1.6"
