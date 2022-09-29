@@ -14,7 +14,7 @@ codegen-units = 1
 [dependencies]
 actix-web = { version = "4", features = ["openssl"] }
 awc = "3.0.1"
-clap = { version = "3", features = ["derive"] }
+clap = { version = "4", features = ["derive"] }
 futures-util = { version = "0.3.24", default-features = false, features = ["std"] }
 regex = "1.6"
 serde = { version = "1", features = ["derive"] }
